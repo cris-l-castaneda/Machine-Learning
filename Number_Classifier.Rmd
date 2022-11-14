@@ -1,0 +1,63 @@
+
+```{r}
+#load packages
+library(tidyverse)
+library(ranger)
+```
+
+
+
+```{r}
+# load the training and test set
+mnist_train_49 <- readRDS(url("https://ericwfox.github.io/data/mnist_train_49.rds"))
+mnist_test_49 <- readRDS(url("https://ericwfox.github.io/data/mnist_test_49.rds"))
+```
+
+
+
+```{r}
+## train random forest classifier that can predict whether a handwritten digit is either a 4 or a 9
+# print images of the first two digits in the training set
+m1 <- mnist_train_49[1, ]
+m1 <- as.numeric(m1[-1])
+image(matrix(m1, 28, 28)[, 28:1],
+col = gray.colors(12, rev = TRUE), xaxt="n", yaxt="n")
+```
+
+```{r}
+m2 <- mnist_train_49[2, ]
+m2 <- as.numeric(m2[-1])
+image(matrix(m2, 28, 28)[, 28:1],
+col = gray.colors(12, rev = TRUE), xaxt="n", yaxt="n")
+```
+
+
+
+```{r}
+# Build a random forest classifier that predicts the digit labels (4’s and 9’s) using the 784 pixel 
+
+# intensities from an image as features (predictor variables). Use the training set (mnist_train_49) to estimate the model
+set.seed(123)
+rf1 <- ranger(y ~ ., data = mnist_train_49,
+num.trees = 200, mtry = 28)
+```
+
+
+
+
+```{r}
+# make predictions
+p1 <- predict(rf1, mnist_test_49)
+
+# confusion matrix
+cm <- table(predicted = p1$predictions, actual = mnist_test_49$y)
+addmargins(cm)
+```
+
+```{r}
+# overall accuracy 
+sum(diag(cm)) / 1000
+```
+
+
+
